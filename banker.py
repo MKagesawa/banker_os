@@ -14,7 +14,6 @@
   execution, print message, abort task, release all its resources.
 - If deadlocked, print message, abort lowest numbered deadlocked task after releasing all its resources
 - deadlock detection: all non-terminated tasks have outstanding requests that manager can't satisfy
--
 """
 
 import sys
@@ -36,6 +35,11 @@ with open(input, 'r') as f:
     for line in range(1, len(lines)):
         data.append(lines[line].rstrip("\n").split())
 
+tVal = firstLine[0]
+rVal = firstLine[1]
+
+resources = {}
+
 class Task:
     def __init__(self, taskNum, numResource):
         self.taskNum = taskNum
@@ -43,12 +47,12 @@ class Task:
         self.state = "unstarted"
         self.resourceClaims = []
         self.resourceHolding = []
-        self.activityQueue = [[]]  # everything needed to do for each task
+        self.activityQueue = []  # everything needed to do for each task
         self.timeUsed = 0
         self.waitingTime = 0
 
-    def addActivity(self, ins, num, delay, type, numRes):
-        self.activityQueue.append([ins, num, delay, type, numRes])
+    def addActivity(self, instruction, num, delay, type, numRes):
+        self.activityQueue.append([instruction, num, delay, type, numRes])
 
     def removeActivity(self):
         if self.state == "aborted":
@@ -64,9 +68,53 @@ class Task:
     def getWaitingPercentage(self):
         return round(Decimal(self.waitingTime/self.timeUsed), 2)
 
-def FIFO():
+def taskFinished(tasks):
+    finished = True
+    for t in tasks:
+        if t != "terminated" and t != "aborted":
+            finished = False
+    return finished
 
-    return
+def isDeadlocked(listA, listB):
+    if not listB: # check if empty, if nothing is blocked, then not deadlocked
+        return False
+    # if something is running, then not deadlocked
+    for a in listA:
+        if a == "running":
+            return False
+    # if request can be granted, not deadlocked
+    for b in listB:
+        if int(resources[b.activityQueue[0][3]]) >= int(b.activityQueue[0][4]):
+            return False
+    return True
+
+
+
+def FIFO():
+    tasks = []
+    # initialize tasks and add to list
+    for i in range(1, tVal + 1):
+        tasks.append(Task(i, rVal))
+
+    # print('tasks: ', tasks)
+    # print('firstLine: ', firstLine)
+
+    # add resources
+    for i in range(2, rVal + 2):
+        resources[i-1] = int(firstLine[i])
+    # print('resources: ', resources)
+
+    # add instructions to activity Queue of Task class
+    for ins in data:
+        tasksNum = int(ins[1])
+        tasks[tasksNum - 1].addActivity(ins[0], ins[1], ins[2], ins[3], ins[4])
+    # print(tasks[0].activityQueue)
+
+    blockedQueue = []
+
+    # keep running until every task is either terminated or aborted
+    while not taskFinished(tasks):
+        
 
 
 
