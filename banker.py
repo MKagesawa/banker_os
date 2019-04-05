@@ -18,6 +18,7 @@
 """
 
 import sys
+from decimal import Decimal
 
 input = sys.argv[1]
 firstLine = []
@@ -42,11 +43,39 @@ class Task:
         self.state = "unstarted"
         self.resourceClaims = []
         self.resourceHolding = []
-        self.activityQueue = []
+        self.activityQueue = [[]]  # everything needed to do for each task
+        self.timeUsed = 0
+        self.waitingTime = 0
+
+    def addActivity(self, ins, num, delay, type, numRes):
+        self.activityQueue.append([ins, num, delay, type, numRes])
+
+    def removeActivity(self):
+        if self.state == "aborted":
+            return
+        # pop if delay is 0
+        elif self.activityQueue[0][2] == "0":
+            return self.activityQueue.remove(0)
+        else:
+        # if delay isn't 0 yet, decrement it
+            self.activityQueue[0][2] -= 1
+            return
+
+    def getWaitingPercentage(self):
+        return round(Decimal(self.waitingTime/self.timeUsed), 2)
+
+def FIFO():
+
+    return
 
 
 
+def Banker():
+    return
 
 
+print("FIFO: ")
+print(FIFO())
 
-
+print("Banker's: ")
+print(Banker())
