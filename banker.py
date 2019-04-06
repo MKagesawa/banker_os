@@ -114,7 +114,28 @@ def FIFO():
 
     # keep running until every task is either terminated or aborted
     while not taskFinished(tasks):
-        
+        # resources to be added at end of each cycle
+        addDict = {}
+        # tasks that can be unblocked and removed from blokckedQueue
+        unblockable = []
+        # check if task can be resolved
+        for task in blockedQueue:
+            activity = task.activityQueue[0]
+            print('activity', activity)
+            # check if resource requested can be fulfilled
+            if activity[0] == "request" and activity[4] <= resources[int(activity[3])]:
+                task.state = "unstarted"
+                task.resourceHolding.replace(activity[3], (activity[4] + task.resourceHolding[int(activity[3])]))
+                resources[activity[3]] = resources[activity[3]] - activity[4]
+                unblockable.append(task)
+
+        # remove resolved task from blocked Queue
+        if(len(unblockable) > 0):
+            for u in unblockable:
+                blockedQueue.remove(u)
+
+        # iterate through all tasks
+        for task in tasks:
 
 
 
