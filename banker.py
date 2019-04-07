@@ -58,15 +58,18 @@ class Task:
         if self.state == "aborted":
             return
         # pop if delay is 0
-        elif self.activityQueue[0][2] == "0":
+        elif self.activityQueue[0][2] == 0:
             return self.activityQueue.remove(0)
         else:
         # if delay isn't 0 yet, decrement it
-            self.activityQueue[0][2] -= 1
+            self.activityQueue[0][2] = int(self.activityQueue[0][2]) - 1
             return
 
     def getWaitingPercentage(self):
-        return round(Decimal(self.waitingTime/self.timeUsed), 2)
+        if self.timeUsed > 0:
+            return round(Decimal(self.waitingTime/self.timeUsed), 2)
+        else:
+            return 0
 
 def taskFinished(tasks):
     finished = True
@@ -189,8 +192,42 @@ def FIFO():
                         else:
                             break
                     task.state = "running"
+                    task.resourceClaims[activityList[3]-1] = activityList[4]
+                    task.timeUsed += counter
+                elif activityList[0] == "request":
+                    task.state = "running"
+                    task.resourceClaims[activityList[3]-1] = activityList[4]
+                    task.timeUsed += 1
 
+        # run until deadlock resolved
+        while not isDeadlocked(tasks, blockedQueue) and not len(blockedQueue) == 0:
+            lowTask = blockedQueue[0].taskNum
+            # get the task with lowest taskNum
+            for blockedTask in blockedQueue:
+                if blockedTask.taskNum < lowTask:
+                    lowTask = blockedTask
 
+            lowTask.state = "aborted"
+            for i in range(len(resources)):
+                # put resource of aborted task back to pool of resources
+                resources[i] = resources[i] + lowTask.resourceHolding[i]
+            blockedQueue.remove(lowTask)
+
+        # add back input amount back to pool of resources
+        for k in addDict.keys():
+            resources[k] = resources[k] + int(addDict[k])
+
+        # print results
+        totalTime = 0
+        totalWait = 0
+        for i in range(len(tasks)):
+            if tasks[i].state == "aborted":
+                print("Task " + str(i) + "\taborted")
+            else:
+                task = tasks[i]
+                print("Task " + str(i) + str(task.timeUsed) + " " + str(task.waitingTime) + " " + str(task.getWaitingPercentage()) + "%")
+                totalTime += task.timeUsed
+                totalWait += task.waitingTime
 
 
 
