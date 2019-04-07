@@ -45,8 +45,8 @@ class Task:
         self.taskNum = taskNum
         self.numResource = numResource
         self.state = "unstarted"
-        self.resourceClaims = []
-        self.resourceHolding = []
+        self.resourceClaims = {}
+        self.resourceHolding = {}
         self.activityQueue = []  # everything needed to do for each task
         self.timeUsed = 0
         self.waitingTime = 0
@@ -136,6 +136,61 @@ def FIFO():
 
         # iterate through all tasks
         for task in tasks:
+            activityList = []
+            if len(task.activityQueue) > 0:
+                activityList.append(task.removeActivity())
+                # if task not processed, delay added
+                if len(activityList) == 0:
+                    task.timeUsed += 1
+                    continue
+
+            if task.state == "running" or task.state == "blocked":
+
+                if activityList[0] == "request":
+                    # calculate resources left
+                    resLeft = resources[activity[3] - activity[4]]
+                    # if it can be granted then grant
+                    if resLeft >= 0:
+                        resources[int(activity[3])] = resLeft
+                        task.resourceHolding[int(activityList[3])] = int(activityList[3]) + int(activityList[4])
+                        task.state = "running"
+                    else:
+                        task.state = "blocked"
+                        if task not in blockedQueue:
+                            blockedQueue.append(task)
+                        # add the activity back to the front of activity queue
+                        task.activityQueue[0].append(activity)
+                        task.waitingTime += 1
+                    task.timeUsed += 1
+
+                elif activityList[0] == "release":
+                    index = activityList[3]
+                    if index in addDict:
+                        addDict[index] = int(addDict[index]) + int(activityList[4])
+                    else:
+                        addDict[index] = activityList[4]
+                    # new holding prior holding - amount released
+                    newHold = task.resourceHolding[index] - activityList[3]
+                    task.resourceHolding[activityList[3]] = newHold
+                    task.timeUsed += 1
+
+                elif activityList[0] == "terminate":
+                    task.state = "terminated"
+
+            if task.state == "unstarted":
+                if activityList[0] == "terminate":
+                    task.state = "terminated"
+                elif activityList[0] == "initiate":
+                    # count number of initiates
+                    counter = 1
+                    for t in task.activityQueue:
+                        if t[0] == "initiate":
+                            counter += 1
+                        else:
+                            break
+                    task.state = "running"
+
+
 
 
 
