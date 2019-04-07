@@ -58,8 +58,8 @@ class Task:
         if self.state == "aborted":
             return
         # pop if delay is 0
-        elif self.activityQueue[0][2] == 0:
-            return self.activityQueue.remove(0)
+        elif self.activityQueue[0][2] == "0":
+            return self.activityQueue.pop(0)
         else:
         # if delay isn't 0 yet, decrement it
             self.activityQueue[0][2] = int(self.activityQueue[0][2]) - 1
@@ -128,7 +128,7 @@ def FIFO():
             # check if resource requested can be fulfilled
             if activity[0] == "request" and activity[4] <= resources[int(activity[3])]:
                 task.state = "unstarted"
-                task.resourceHolding.replace(activity[3], (activity[4] + task.resourceHolding[int(activity[3])]))
+                task.resourceHolding[activity[3]] = activity[4] + task.resourceHolding[int(activity[3])]
                 resources[activity[3]] = resources[activity[3]] - activity[4]
                 unblockable.append(task)
 
@@ -151,10 +151,10 @@ def FIFO():
 
                 if activityList[0] == "request":
                     # calculate resources left
-                    resLeft = resources[activity[3] - activity[4]]
+                    resLeft = resources[activityList[3] - activityList[4]]
                     # if it can be granted then grant
                     if resLeft >= 0:
-                        resources[int(activity[3])] = resLeft
+                        resources[int(activityList[3])] = resLeft
                         task.resourceHolding[int(activityList[3])] = int(activityList[3]) + int(activityList[4])
                         task.state = "running"
                     else:
@@ -162,7 +162,7 @@ def FIFO():
                         if task not in blockedQueue:
                             blockedQueue.append(task)
                         # add the activity back to the front of activity queue
-                        task.activityQueue[0].append(activity)
+                        task.activityQueue[0].append(activityList)
                         task.waitingTime += 1
                     task.timeUsed += 1
 
@@ -181,6 +181,7 @@ def FIFO():
                     task.state = "terminated"
 
             if task.state == "unstarted":
+                # print('activityList', activityList)
                 if activityList[0] == "terminate":
                     task.state = "terminated"
                 elif activityList[0] == "initiate":
@@ -217,17 +218,17 @@ def FIFO():
         for k in addDict.keys():
             resources[k] = resources[k] + int(addDict[k])
 
-        # print results
-        totalTime = 0
-        totalWait = 0
-        for i in range(len(tasks)):
-            if tasks[i].state == "aborted":
-                print("Task " + str(i) + "\taborted")
-            else:
-                task = tasks[i]
-                print("Task " + str(i) + str(task.timeUsed) + " " + str(task.waitingTime) + " " + str(task.getWaitingPercentage()) + "%")
-                totalTime += task.timeUsed
-                totalWait += task.waitingTime
+    # print results
+    totalTime = 0
+    totalWait = 0
+    for i in range(len(tasks)):
+        if tasks[i].state == "aborted":
+            print("Task " + str(i) + "\taborted")
+        else:
+            task = tasks[i]
+            print("Task " + str(i) + str(task.timeUsed) + " " + str(task.waitingTime) + " " + str(task.getWaitingPercentage()) + "%")
+            totalTime += task.timeUsed
+            totalWait += task.waitingTime
 
 
 
