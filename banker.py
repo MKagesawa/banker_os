@@ -20,6 +20,8 @@ import sys
 from decimal import Decimal
 
 input = sys.argv[1]
+# for debugger
+# input = "input-01.txt"
 firstLine = []
 data = []
 
@@ -74,12 +76,12 @@ class Task:
 def taskFinished(tasks):
     finished = True
     for t in tasks:
-        if t != "terminated" and t != "aborted":
+        if t.state != "terminated" and t.state != "aborted":
             finished = False
     return finished
 
 def isDeadlocked(listA, listB):
-    if not listB: # check if empty, if nothing is blocked, then not deadlocked
+    if len(listB) > 0: # check if empty, if nothing is blocked, then not deadlocked
         return False
     # if something is running, then not deadlocked
     for a in listA:
@@ -87,7 +89,8 @@ def isDeadlocked(listA, listB):
             return False
     # if request can be granted, not deadlocked
     for b in listB:
-        if int(resources[b.activityQueue[0][3]]) >= int(b.activityQueue[0][4]):
+        # print('b.activityQueue', b.activityQueue)
+        if int(resources[int(b.activityQueue[0][3])]) >= int(b.activityQueue[0][4]):
             return False
     return True
 
@@ -124,7 +127,7 @@ def FIFO():
         # check if task can be resolved
         for task in blockedQueue:
             activity = task.activityQueue[0]
-            print('activity', activity)
+            # print('activity', activity)
             # check if resource requested can be fulfilled
             if activity[0] == "request" and activity[4] <= resources[int(activity[3])]:
                 task.state = "unstarted"
@@ -140,18 +143,24 @@ def FIFO():
         # iterate through all tasks
         for task in tasks:
             activityList = []
+            # print('taskNum', task.taskNum)
+            # print('activityQueue', task.activityQueue)
             if len(task.activityQueue) > 0:
-                activityList.append(task.removeActivity())
+                activityList = task.removeActivity()
                 # if task not processed, delay added
                 if len(activityList) == 0:
                     task.timeUsed += 1
                     continue
+            # print('activityList', activityList)
 
             if task.state == "running" or task.state == "blocked":
 
                 if activityList[0] == "request":
                     # calculate resources left
-                    resLeft = resources[activityList[3] - activityList[4]]
+                    print('resources', resources)
+                    print('int(activityList[3]): ', int(activityList[3]))
+                    print('int(activityList[4]): ', int(activityList[4]))
+                    resLeft = resources[int(activityList[3])] - int(activityList[4])
                     # if it can be granted then grant
                     if resLeft >= 0:
                         resources[int(activityList[3])] = resLeft
@@ -173,7 +182,7 @@ def FIFO():
                     else:
                         addDict[index] = activityList[4]
                     # new holding prior holding - amount released
-                    newHold = task.resourceHolding[index] - activityList[3]
+                    newHold = task.resourceHolding[int(index)] - int(activityList[3])
                     task.resourceHolding[activityList[3]] = newHold
                     task.timeUsed += 1
 
@@ -181,7 +190,7 @@ def FIFO():
                     task.state = "terminated"
 
             if task.state == "unstarted":
-                # print('activityList', activityList)
+                print('activityList', activityList)
                 if activityList[0] == "terminate":
                     task.state = "terminated"
                 elif activityList[0] == "initiate":
@@ -193,43 +202,47 @@ def FIFO():
                         else:
                             break
                     task.state = "running"
-                    task.resourceClaims[activityList[3]-1] = activityList[4]
+                    task.resourceClaims[int(activityList[3])-1] = activityList[4]
                     task.timeUsed += counter
                 elif activityList[0] == "request":
                     task.state = "running"
-                    task.resourceClaims[activityList[3]-1] = activityList[4]
+                    task.resourceClaims[int(activityList[3])-1] = activityList[4]
                     task.timeUsed += 1
 
         # run until deadlock resolved
         while not isDeadlocked(tasks, blockedQueue) and not len(blockedQueue) == 0:
-            lowTask = blockedQueue[0].taskNum
+            lowTask = blockedQueue[0]
             # get the task with lowest taskNum
             for blockedTask in blockedQueue:
-                if blockedTask.taskNum < lowTask:
+                if blockedTask.taskNum < lowTask.taskNum:
                     lowTask = blockedTask
 
             lowTask.state = "aborted"
-            for i in range(len(resources)):
+            for i in range(1, len(resources) + 1):
                 # put resource of aborted task back to pool of resources
                 resources[i] = resources[i] + lowTask.resourceHolding[i]
             blockedQueue.remove(lowTask)
 
         # add back input amount back to pool of resources
         for k in addDict.keys():
-            resources[k] = resources[k] + int(addDict[k])
+            resources[int(k)] = resources[int(k)] + int(addDict[k])
 
     # print results
     totalTime = 0
     totalWait = 0
+    totalPercent = 0
     for i in range(len(tasks)):
         if tasks[i].state == "aborted":
-            print("Task " + str(i) + "\taborted")
+            print("Task " + str(i + 1) + "\taborted")
         else:
             task = tasks[i]
-            print("Task " + str(i) + str(task.timeUsed) + " " + str(task.waitingTime) + " " + str(task.getWaitingPercentage()) + "%")
+            print("Task " + str(i + 1) + "\t" + str(task.timeUsed) + "\t" + str(task.waitingTime) + "\t" + str(task.getWaitingPercentage()) + "%")
             totalTime += task.timeUsed
             totalWait += task.waitingTime
 
+    if totalTime > 0:
+        totalPercent = round(Decimal(totalWait / totalTime), 2)
+    print("total\t" + str(totalTime) + "\t" + str(totalWait) + "\t" + str(totalPercent) + "%")
 
 
 def Banker():

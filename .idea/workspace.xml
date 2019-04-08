@@ -12,7 +12,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/banker_os$banker.coverage" NAME="banker Coverage Results" MODIFIED="1554488810176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/banker_os$banker.coverage" NAME="banker Coverage Results" MODIFIED="1554680652154" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="1859790972">
@@ -41,14 +41,14 @@
         <counts>
           <entry key="gitignore" value="18" />
           <entry key="md" value="11" />
-          <entry key="py" value="6845" />
+          <entry key="py" value="7357" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="11" />
           <entry key="PLAIN_TEXT" value="18" />
-          <entry key="Python" value="6845" />
+          <entry key="Python" value="7357" />
         </counts>
       </usages-collector>
     </session>
@@ -61,14 +61,14 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/banker.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="479">
-              <caret line="105" column="32" lean-forward="true" selection-start-line="105" selection-start-column="32" selection-end-line="105" selection-end-column="32" />
+            <state relative-caret-position="303">
+              <caret line="220" column="47" selection-start-line="220" selection-start-column="47" selection-end-line="220" selection-end-column="47" />
               <folding>
                 <element signature="e#995#1005#0" expanded="true" />
-                <marker date="1554678178149" expanded="true" signature="1514:1519" ph="..." />
-                <marker date="1554678178149" expanded="true" signature="2553:3140" ph="..." />
-                <marker date="1554678178149" expanded="true" signature="3703:8926" ph="..." />
-                <marker date="1554678178149" expanded="true" signature="8856:8859" ph="..." />
+                <marker date="1554682408685" expanded="true" signature="1554:1559" ph="..." />
+                <marker date="1554682408685" expanded="true" signature="2593:3254" ph="..." />
+                <marker date="1554682408685" expanded="true" signature="3817:9641" ph="..." />
+                <marker date="1554682408685" expanded="true" signature="9571:9574" ph="..." />
               </folding>
             </state>
           </provider>
@@ -106,6 +106,10 @@
       <find>unstar</find>
       <find>print(</find>
       <find>activity</find>
+      <find>activitylist.</find>
+      <find>reslef</find>
+      <find>print('re</find>
+      <find>initiate</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -223,7 +227,7 @@
       <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" show_stripe_button="false" />
       <window_info anchor="bottom" id="Python Console" />
-      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.2777202" />
+      <window_info active="true" anchor="bottom" id="Terminal" visible="true" weight="0.36476684" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -316,9 +320,6 @@
     <entry file="file://$PROJECT_DIR$/input-09.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/input-02.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/input-01.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -326,16 +327,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/input-02.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/banker.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="479">
-          <caret line="105" column="32" lean-forward="true" selection-start-line="105" selection-start-column="32" selection-end-line="105" selection-end-column="32" />
+        <state relative-caret-position="303">
+          <caret line="220" column="47" selection-start-line="220" selection-start-column="47" selection-end-line="220" selection-end-column="47" />
           <folding>
             <element signature="e#995#1005#0" expanded="true" />
-            <marker date="1554678178149" expanded="true" signature="1514:1519" ph="..." />
-            <marker date="1554678178149" expanded="true" signature="2553:3140" ph="..." />
-            <marker date="1554678178149" expanded="true" signature="3703:8926" ph="..." />
-            <marker date="1554678178149" expanded="true" signature="8856:8859" ph="..." />
+            <marker date="1554682408685" expanded="true" signature="1554:1559" ph="..." />
+            <marker date="1554682408685" expanded="true" signature="2593:3254" ph="..." />
+            <marker date="1554682408685" expanded="true" signature="3817:9641" ph="..." />
+            <marker date="1554682408685" expanded="true" signature="9571:9574" ph="..." />
           </folding>
         </state>
       </provider>
