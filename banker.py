@@ -21,7 +21,7 @@ from decimal import Decimal
 
 input = sys.argv[1]
 # for debugger
-# input = "input-01.txt"
+# input = "input-11.txt"
 firstLine = []
 data = []
 
@@ -184,12 +184,22 @@ def FIFO():
                     else:
                         addDict[index] = activityList[4]
                     # new holding prior holding - amount released
-                    newHold = task.resourceHolding[int(index)] - int(activityList[3])
+                    newHold = task.resourceHolding[int(index)] - int(activityList[4])
                     task.resourceHolding[int(activityList[3])] = newHold
                     task.timeUsed += 1
 
                 elif activityList[0] == "terminate":
                     task.state = "terminated"
+
+                elif activityList[0] == "initiate":
+                    # count number of initiates
+                    task.state = "running"
+                    task.resourceClaims[int(activityList[3])] = int(activityList[4])
+
+                    # check resource claim not exceeded
+                    if task.resourceClaims[int(activityList[3])] > resources[int(activityList[3])]:
+                        # task aborted if exceeded
+                        task.state = "aborted"
 
             if task.state == "unstarted":
                 if activityList[0] == "terminate":
@@ -320,18 +330,29 @@ def Banker():
                     task.timeUsed += 1
 
                 elif activityList[0] == "release":
-                    index = activityList[3]
+                    index = int(activityList[3])
                     if index in addDict:
                         addDict[index] = int(addDict[index]) + int(activityList[4])
                     else:
-                        addDict[index] = activityList[4]
+                        addDict[index] = int(activityList[4])
                     # new holding prior holding - amount released
-                    newHold = task.resourceHolding[int(index)] - int(activityList[3])
+                    newHold = task.resourceHolding[int(index)] - int(activityList[4])
                     task.resourceHolding[int(activityList[3])] = newHold
                     task.timeUsed += 1
 
                 elif activityList[0] == "terminate":
                     task.state = "terminated"
+
+                elif activityList[0] == "initiate":
+                    # count number of initiates
+                    task.state = "running"
+                    task.resourceClaims[int(activityList[3])] = int(activityList[4])
+
+                    # check resource claim not exceeded
+                    if task.resourceClaims[int(activityList[3])] > resources[int(activityList[3])]:
+                        # task aborted if exceeded
+                        task.state = "aborted"
+
 
             if task.state == "unstarted":
                 if activityList[0] == "terminate":
@@ -351,6 +372,10 @@ def Banker():
                     if task.resourceClaims[int(activityList[3])] > resources[int(activityList[3])]:
                         # task aborted if exceeded
                         task.state = "aborted"
+                        # print abort
+                        print("Banker aborts task " + str(task.taskNum) + " before run begins:")
+                        print("claim for resource " + str(activityList[3]) + " (" + str(task.resourceClaims[int(activityList[3])])
+                              + ") exceeds number of units present (" + str(resources[int(activityList[3])]) + ")")
 
                     task.timeUsed += counter
                 elif activityList[0] == "request":
