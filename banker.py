@@ -21,7 +21,7 @@ from decimal import Decimal
 
 input = sys.argv[1]
 # for debugger
-# input = "input-12.txt"
+# input = "input-01.txt"
 firstLine = []
 data = []
 
@@ -279,7 +279,7 @@ def Banker():
             activity = task.activityQueue[0]
 
             # check if resource requested can be fulfilled
-            if activity[0] == "request" and int(activity[4]) <= resources[int(activity[3])]:
+            if activity[0] == "request" and safetyCheck(task):
                 task.state = "unstarted"
                 task.resourceHolding[int(activity[3])] = int(activity[4]) + task.resourceHolding[int(activity[3])]
                 resources[int(activity[3])] = resources[int(activity[3])] - int(activity[4])
