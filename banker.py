@@ -94,36 +94,35 @@ def isDeadlocked(listA, listB):
             return False
     # if request can be granted, not deadlocked
     for b in listB:
-        # print('b.activityQueue', b.activityQueue)
-        print("b.activityQueue[0][3]: ", int(resources[int(b.activityQueue[0][3])]))
-        print("b.activityQueue[0][4]: ", int(b.activityQueue[0][4]))
         if int(resources[int(b.activityQueue[0][3])]) >= int(b.activityQueue[0][4]):
             return False
     return True
 
+def safetyCheck(task):
+    for k in task.resourceHolding:
+        # return false and block if resource available is less than amount requested
+        if task.resourceClaims[k] - task.resourceHolding[k] > resources[k]:
+            task.state = "blocked"
+            return False
+    return True
 
 
 def FIFO():
     tasks = []
+    cycle = 0
     # initialize tasks and add to list
     for i in range(1, tVal + 1):
         tasks.append(Task(i, rVal))
 
-    # print('tasks: ', tasks)
-    # print('firstLine: ', firstLine)
-
     # add resources
     for i in range(2, rVal + 2):
         resources[i-1] = int(firstLine[i])
-    # print('resources: ', resources)
 
     # add instructions to activity Queue of Task class
     for ins in data:
         if len(ins) > 0:
             tasksNum = int(ins[1])
             tasks[tasksNum - 1].addActivity(ins[0], ins[1], ins[2], ins[3], ins[4])
-    print(tasks[1].activityQueue)
-    # print(tasks[0].activityQueue)
 
     blockedQueue = []
 
@@ -136,7 +135,7 @@ def FIFO():
         # check if task can be resolved
         for task in blockedQueue:
             activity = task.activityQueue[0]
-            # print('activity', activity)
+
             # check if resource requested can be fulfilled
             if activity[0] == "request" and int(activity[4]) <= resources[int(activity[3])]:
                 task.state = "unstarted"
@@ -151,27 +150,18 @@ def FIFO():
 
         # iterate through all tasks
         for task in tasks:
-            print('resources: ', resources)
-            print(task.taskNum, task.state)
-            print('task.resourceHolding: ', task.taskNum, task.resourceHolding)
             activityList = []
-            # print('taskNum', task.taskNum)
-            # print('activityQueue', task.activityQueue)
             if len(task.activityQueue) > 0:
                 activityList = task.removeActivity()
                 # if task not processed, delay added
                 if activityList is None:
                     task.timeUsed += 1
                     continue
-            # print('activityList', activityList)
 
             if task.state == "running" or task.state == "blocked":
 
                 if activityList[0] == "request":
                     # calculate resources left
-                    # print('resources', resources)
-                    # print('int(activityList[3]): ', int(activityList[3]))
-                    # print('int(activityList[4]): ', int(activityList[4]))
                     resLeft = resources[int(activityList[3])] - int(activityList[4])
                     # if it can be granted then grant
                     if resLeft >= 0:
@@ -202,7 +192,6 @@ def FIFO():
                     task.state = "terminated"
 
             if task.state == "unstarted":
-                # print('activityList', activityList)
                 if activityList[0] == "terminate":
                     task.state = "terminated"
                 elif activityList[0] == "initiate":
@@ -233,12 +222,155 @@ def FIFO():
             for i in range(1, len(resources) + 1):
                 # put resource of aborted task back to pool of resources
                 resources[i] = resources[i] + lowTask.resourceHolding[i]
-                print(resources)
             blockedQueue.remove(lowTask)
 
         # add back input amount back to pool of resources
         for k in addDict.keys():
             resources[int(k)] = resources[int(k)] + int(addDict[k])
+        cycle += 1
+        # print('cycle: ', cycle)
+
+    # print results
+    totalTime = 0
+    totalWait = 0
+    totalPercent = 0
+    for i in range(len(tasks)):
+        if tasks[i].state == "aborted":
+            print("Task " + str(i + 1) + "\taborted")
+        else:
+            task = tasks[i]
+            print("Task " + str(i + 1) + "\t" + str(task.timeUsed) + "\t" + str(task.waitingTime) + "\t" + str(task.getWaitingPercentage()*100) + "%")
+            totalTime += task.timeUsed
+            totalWait += task.waitingTime
+
+    if totalTime > 0:
+        totalPercent = round(Decimal(totalWait / totalTime), 2)
+    print("total\t" + str(totalTime) + "\t" + str(totalWait) + "\t" + str(totalPercent*100) + "%")
+    print("\n")
+
+
+def Banker():
+    tasks = []
+    cycle = 0
+    # initialize tasks and add to list
+    for i in range(1, tVal + 1):
+        tasks.append(Task(i, rVal))
+
+    # add resources
+    for i in range(2, rVal + 2):
+        resources[i-1] = int(firstLine[i])
+
+    # add instructions to activity Queue of Task class
+    for ins in data:
+        if len(ins) > 0:
+            tasksNum = int(ins[1])
+            tasks[tasksNum - 1].addActivity(ins[0], ins[1], ins[2], ins[3], ins[4])
+
+    blockedQueue = []
+
+    # keep running until every task is either terminated or aborted
+    while not taskFinished(tasks):
+        # resources to be added at end of each cycle
+        addDict = {}
+        # tasks that can be unblocked and removed from blokckedQueue
+        unblockable = []
+        # check if task can be resolved
+        for task in blockedQueue:
+            activity = task.activityQueue[0]
+
+            # check if resource requested can be fulfilled
+            if activity[0] == "request" and int(activity[4]) <= resources[int(activity[3])]:
+                task.state = "unstarted"
+                task.resourceHolding[int(activity[3])] = int(activity[4]) + task.resourceHolding[int(activity[3])]
+                resources[int(activity[3])] = resources[int(activity[3])] - int(activity[4])
+                unblockable.append(task)
+
+        # remove resolved task from blocked Queue
+        if(len(unblockable) > 0):
+            for u in unblockable:
+                blockedQueue.remove(u)
+
+        # iterate through all tasks
+        for task in tasks:
+            activityList = []
+            if len(task.activityQueue) > 0:
+                activityList = task.removeActivity()
+                # if task not processed, delay added
+                if activityList is None:
+                    task.timeUsed += 1
+                    continue
+
+            if task.state == "running" or task.state == "blocked":
+
+                if activityList[0] == "request":
+                    # calculate resources left
+                    resLeft = resources[int(activityList[3])] - int(activityList[4])
+                    # if it can be granted then grant
+                    if safetyCheck(task):
+                        resources[int(activityList[3])] = resLeft
+                        task.resourceHolding[int(activityList[3])] = task.resourceHolding[int(activityList[3])] + int(activityList[4])
+                        task.state = "running"
+                    else:
+                        task.state = "blocked"
+                        if task not in blockedQueue:
+                            blockedQueue.append(task)
+                        # add the activity back to the front of activity queue
+                        task.activityQueue.insert(0, activityList)
+                        task.waitingTime += 1
+                    task.timeUsed += 1
+
+                elif activityList[0] == "release":
+                    index = activityList[3]
+                    if index in addDict:
+                        addDict[index] = int(addDict[index]) + int(activityList[4])
+                    else:
+                        addDict[index] = activityList[4]
+                    # new holding prior holding - amount released
+                    newHold = task.resourceHolding[int(index)] - int(activityList[3])
+                    task.resourceHolding[int(activityList[3])] = newHold
+                    task.timeUsed += 1
+
+                elif activityList[0] == "terminate":
+                    task.state = "terminated"
+
+            if task.state == "unstarted":
+                if activityList[0] == "terminate":
+                    task.state = "terminated"
+                elif activityList[0] == "initiate":
+                    # count number of initiates
+                    counter = 1
+                    for t in task.activityQueue:
+                        if t[0] == "initiate":
+                            counter += 1
+                        else:
+                            break
+                    task.state = "running"
+                    task.resourceClaims[int(activityList[3])] = int(activityList[4])
+
+                    # check resource claim not exceeded
+                    if task.resourceClaims[int(activityList[3])] > resources[int(activityList[3])]:
+                        # task aborted if exceeded
+                        task.state = "aborted"
+
+                    task.timeUsed += counter
+                elif activityList[0] == "request":
+                    counter = 1
+                    for activity in task.activityQueue:
+                        if activity[0] == "initiate":
+                            counter += 1
+                        else:
+                            break
+                    task.state = "running"
+                    task.resourceClaims[int(activityList[3])] = int(activityList[4])
+                    task.timeUsed += 1
+
+        # no need to check for deadlock in banker's algorithm
+
+        # add back input amount back to pool of resources
+        for k in addDict.keys():
+            resources[int(k)] = resources[int(k)] + int(addDict[k])
+        cycle += 1
+        # print('cycle: ', cycle)
 
     # print results
     totalTime = 0
@@ -258,12 +390,36 @@ def FIFO():
     print("total\t" + str(totalTime) + "\t" + str(totalWait) + "\t" + str(totalPercent*100) + "%")
 
 
-def Banker():
-    return
-
-
 print("FIFO: ")
-print(FIFO())
+FIFO()
 
 print("Banker's: ")
-print(Banker())
+Banker()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
