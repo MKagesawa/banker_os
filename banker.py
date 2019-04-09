@@ -19,9 +19,9 @@
 import sys
 from decimal import Decimal
 
-# input = sys.argv[1]
+input = sys.argv[1]
 # for debugger
-input = "input-12.txt"
+# input = "input-12.txt"
 firstLine = []
 data = []
 
@@ -65,7 +65,7 @@ class Task:
         if self.state == "aborted":
             return
         # pop if delay is 0
-        elif self.activityQueue[0][2] == "0":
+        elif int(self.activityQueue[0][2]) <= 0:
             return self.activityQueue.pop(0)
         else:
         # if delay isn't 0 yet, decrement it
