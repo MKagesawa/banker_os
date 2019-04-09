@@ -21,7 +21,7 @@ from decimal import Decimal
 
 input = sys.argv[1]
 # for debugger
-# input = "input-02.txt"
+# input = "input-05.txt"
 firstLine = []
 data = []
 
@@ -138,8 +138,8 @@ def FIFO():
             # check if resource requested can be fulfilled
             if activity[0] == "request" and int(activity[4]) <= resources[int(activity[3])]:
                 task.state = "unstarted"
-                task.resourceHolding[activity[3]] = int(activity[4]) + task.resourceHolding[int(activity[3])]
-                resources[activity[3]] = resources[int(activity[3])] - int(activity[4])
+                task.resourceHolding[int(activity[3])] = int(activity[4]) + task.resourceHolding[int(activity[3])]
+                resources[int(activity[3])] = resources[int(activity[3])] - int(activity[4])
                 unblockable.append(task)
 
         # remove resolved task from blocked Queue
@@ -193,7 +193,7 @@ def FIFO():
                         addDict[index] = activityList[4]
                     # new holding prior holding - amount released
                     newHold = task.resourceHolding[int(index)] - int(activityList[3])
-                    task.resourceHolding[activityList[3]] = newHold
+                    task.resourceHolding[int(activityList[3])] = newHold
                     task.timeUsed += 1
 
                 elif activityList[0] == "terminate":
