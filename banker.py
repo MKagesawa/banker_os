@@ -19,9 +19,9 @@
 import sys
 from decimal import Decimal
 
-input = sys.argv[1]
+# input = sys.argv[1]
 # for debugger
-# input = "input-05.txt"
+input = "input-12.txt"
 firstLine = []
 data = []
 
@@ -119,8 +119,10 @@ def FIFO():
 
     # add instructions to activity Queue of Task class
     for ins in data:
-        tasksNum = int(ins[1])
-        tasks[tasksNum - 1].addActivity(ins[0], ins[1], ins[2], ins[3], ins[4])
+        if len(ins) > 0:
+            tasksNum = int(ins[1])
+            tasks[tasksNum - 1].addActivity(ins[0], ins[1], ins[2], ins[3], ins[4])
+    print(tasks[1].activityQueue)
     # print(tasks[0].activityQueue)
 
     blockedQueue = []
